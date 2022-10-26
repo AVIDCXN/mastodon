@@ -102,7 +102,7 @@ class AccountSearchService < BaseService
     {
       script_score: {
         script: {
-          source: "(doc['followers_count'].value + 0.0) / (doc['followers_count'].value + doc['following_count'].value + 1)",
+          source: "(Math.max(doc['followers_count'].value, 0) + 0.0) / (Math.max(doc['followers_count'].value, 0) + Math.max(doc['following_count'].value, 0) + 1)",
         },
       },
     }
@@ -110,10 +110,10 @@ class AccountSearchService < BaseService
 
   def followers_score_function
     {
-      field_value_factor: {
-        field: 'followers_count',
-        modifier: 'log2p',
-        missing: 0,
+      script_score: {
+        script: {
+          source: "log2p(Math.max(doc['followers_count'].value, 0))"
+        },
       },
     }
   end
